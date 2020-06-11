@@ -1,5 +1,5 @@
 /**
- * @license Copyright (c) 2003-2020, CKSource - Frederico Knabben. All rights reserved.
+ * @license Copyright (c) 2003-2019, CKSource - Frederico Knabben. All rights reserved.
  * For licensing, see LICENSE.md or https://ckeditor.com/legal/ckeditor-oss-license
  */
 
@@ -34,10 +34,13 @@ export default class ImageUploadUI extends Plugin {
 			const view = new FileDialogButtonView( locale );
 			const command = editor.commands.get( 'imageUpload' );
 			const imageTypes = editor.config.get( 'image.upload.types' );
+			const imageExtraTypes = editor.config.get( 'image.upload.extraTypes' );
+			const acceptedType = [...imageTypes.map( type => `image/${ type }` ),...imageExtraTypes].join( ',' );
+			
 			const imageTypesRegExp = createImageTypeRegExp( imageTypes );
-
+			
 			view.set( {
-				acceptedType: imageTypes.map( type => `image/${ type }` ).join( ',' ),
+				acceptedType,
 				allowMultipleFiles: true
 			} );
 
@@ -50,9 +53,8 @@ export default class ImageUploadUI extends Plugin {
 			view.buttonView.bind( 'isEnabled' ).to( command );
 
 			view.on( 'done', ( evt, files ) => {
-				const imagesToUpload = Array.from( files ).filter( file => imageTypesRegExp.test( file.type ) );
-
-				if ( imagesToUpload.length ) {
+				const imagesToUpload = imageExtraTypes?Array.from( files ):Array.from( files ).filter( file => imageTypesRegExp.test( file.type ) );
+				if ( imagesToUpload.length) {
 					editor.execute( 'imageUpload', { file: imagesToUpload } );
 				}
 			} );
