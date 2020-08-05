@@ -60,6 +60,9 @@ export default class ImageUploadEditing extends Plugin {
 		const fileRepository = editor.plugins.get( FileRepository );
 
 		const imageTypes = createImageTypeRegExp( editor.config.get( 'image.upload.types' ) );
+		const uploadTypes = editor.config.get( 'image.upload.types' );
+		const imageExtraTypes = editor.config.get( 'image.upload.extraTypes' );
+		const acceptedType = [...uploadTypes.map( type => `image/${ type }` ),...imageExtraTypes].join( ',' );
 
 		// Setup schema to allow uploadId and uploadStatus for images.
 		schema.extend( 'image', {
@@ -95,8 +98,8 @@ export default class ImageUploadEditing extends Plugin {
 				if ( !file ) {
 					return false;
 				}
-
-				return imageTypes.test( file.type );
+				return acceptedType.includes(file.type);
+				//return imageTypes.test( file.type );
 			} );
 
 			const ranges = data.targetRanges.map( viewRange => editor.editing.mapper.toModelRange( viewRange ) );
